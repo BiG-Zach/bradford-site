@@ -1,0 +1,22 @@
+:root {
+  --aurora-jade-500: oklch(66% 0.15 200);
+  --aurora-jade-500-hex: #12bfae;
+  --aurora-jade-600: oklch(58% 0.15 200);
+  --aurora-jade-600-hex: #0ea99d;
+
+  --sky-sapphire-500: oklch(68% 0.15 240);
+  --sky-sapphire-500-hex: #2aa8ff;
+  --ion-blue-600: oklch(60% 0.18 240);
+  --ion-blue-600-hex: #1989ee;
+
+  --ink-900: #0a1420;
+  --ink-glass: #07111b;
+  --surface-base: #f7f9fb;
+
+  --success-500: #22c98d;
+  --warning-500: #f4d164;
+  --danger-500: #e0523c;
+}
+[data-theme="dark"] {
+  --ink-900: #e5e7eb;
+}

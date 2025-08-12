@@ -1,0 +1,1 @@
+import{a as s,j as o,m as u}from"./index-b7dbf44b.js";function c({as:i="div",className:t,children:e,delay:n=0}){const a=s(),r=i;return a?o.jsx(r,{className:t,children:e}):o.jsx(u.div,{className:t,initial:{opacity:0,y:14},whileInView:{opacity:1,y:0},viewport:{amount:.25,once:!0},transition:{duration:.45,ease:"easeOut",delay:n},children:e})}export{c as R};

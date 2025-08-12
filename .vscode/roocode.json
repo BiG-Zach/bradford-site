@@ -1,0 +1,8 @@
+{
+  "model": "nvidia/nemotron-3-3-49b-chat",
+  "provider": "openrouter",
+  "apiBase": "https://openrouter.ai/api/v1",
+  "apiKey": "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",
+  "autoApprove": true,
+  "tools": ["Read", "Write", "Execute", "Browser", "MCP", "ModifyConfig"]
+}

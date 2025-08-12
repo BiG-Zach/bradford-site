@@ -1,0 +1,120 @@
+/* Import once globally:  import "../styles/accents.css" */
+
+/* Subtle accents */
+.bg-band {
+  background: linear-gradient(180deg, rgba(16,185,129,0.04) 0%, rgba(59,130,246,0.03) 40%, rgba(0,0,0,0) 100%);
+}
+.divider-soft { border-top: 1px solid rgba(148,163,184,0.6); } /* slate-400/60 */
+
+.corner-glow { position: relative; isolation: isolate; }
+.corner-glow::before {
+  content: ""; position: absolute; z-index: -1; width: 28rem; height: 28rem; right: -10rem; top: -6rem;
+  background: radial-gradient(50% 50% at 50% 50%, rgba(16,185,129,0.10) 0%, rgba(16,185,129,0.06) 35%, rgba(16,185,129,0.00) 70%);
+  filter: blur(12px); pointer-events: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .motion-safe-only { animation: none !important; transition: none !important; }
+}
+
+/* Luxury helpers: grain + diagonals */
+.noise-fine {
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='140' height='140' viewBox='0 0 140 140'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix type='saturate' values='0'/><feComponentTransfer><feFuncA type='table' tableValues='0 0 .02 .04 .06 .08 .10 .12 .14 .16 .18 .2'/></feComponentTransfer></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+  background-size: 140px 140px; mix-blend-mode: overlay; pointer-events: none;
+}
+.clip-diagonal-left  { clip-path: polygon(12% 0, 100% 0, 100% 100%, 0% 100%); }
+.clip-diagonal-right { clip-path: polygon(0 0, 100% 0, 88% 100%, 0% 100%); }
+
+/* --- Luxury sheen for diagonal panels --- */
+@keyframes sheen-sweep {
+  0%   { background-position: -40% 0; }
+  100% { background-position: 140% 0; }
+}
+.sheen-diagonal {
+  background-image:
+    linear-gradient(120deg,
+      rgba(255,255,255,0) 0%,
+      rgba(255,255,255,0.09) 15%,
+      rgba(255,255,255,0) 30%);
+  background-size: 220% 100%;
+  mix-blend-mode: overlay;
+  opacity: .35;
+  animation: sheen-sweep 6s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sheen-diagonal { animation: none !important; }
+}
+
+/* Hue band uses a CSS custom property for HSL hue; JS sets --band-h (155..205). */
+.hue-band {
+  --band-h: 180;
+  background: linear-gradient(
+    135deg,
+    hsl(var(--band-h) 70% 44% / 0.20) 0%,
+    hsl(calc(var(--band-h) + 12) 75% 48% / 0.18) 30%,
+    hsl(calc(var(--band-h) + 24) 80% 52% / 0.16) 60%,
+    transparent 100%
+  );
+}
+
+/* Bottom page vignette (emerald → transparent), tuned for legibility over footer */
+.footer-vignette {
+  height: 18vh; /* soft but visible; no layout shift because fixed */
+  background: linear-gradient(
+    to top,
+    rgba(2, 44, 34, 0.30) 0%,         /* deep emerald shadow */
+    rgba(16, 185, 129, 0.14) 28%,     /* emerald tint */
+    rgba(56, 189, 248, 0.10) 52%,     /* sky tint */
+    rgba(0, 0, 0, 0.00) 100%
+  );
+  transition: opacity 140ms linear;   /* motion-safe: minimal, no transforms */
+  opacity: 0;
+}
+@media (prefers-reduced-motion: reduce) {
+  .footer-vignette { transition: none; }
+}
+
+/* Aurora Jade palette utilities */
+.bg-band { background: linear-gradient(180deg, rgba(18,191,174,0.06), rgba(42,168,255,0.06)); }
+.triple-scrim { background-image: linear-gradient(180deg, rgba(7,17,27,0.70) 0%, rgba(7,17,27,0.35) 28%, rgba(7,17,27,0.00) 46%), linear-gradient(180deg, rgba(7,17,27,0.00) 55%, rgba(7,17,27,0.35) 78%, rgba(7,17,27,0.70) 100%), radial-gradient(1200px 600px at 60% 20%, rgba(42,168,255,0.18), rgba(42,168,255,0) 60%); }
+.gradient-grain::before {
+  content: ""; position: absolute; inset: 0; pointer-events: none;
+  background-image: url("/noise/noise-2pct.png"); opacity: .025;
+}
+
+/* Glass morphism with Aurora Jade styling */
+.glass {
+  background: rgba(255,255,255,0.18);
+  -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px);
+  border: 1px solid rgba(255,255,255,0.32); border-radius: 18px;
+}
+.glass-dock {
+  background: linear-gradient(180deg, rgba(255,255,255,0.55), rgba(255,255,255,0.35));
+  -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px);
+  border: 1px solid rgba(255,255,255,0.45); border-radius: 18px;
+  box-shadow: 0 10px 36px rgba(25,137,238,0.18);
+}
+
+/* Aurora Jade button styles */
+.btn-primary {
+  @apply inline-flex items-center justify-center rounded-xl px-5 py-3 font-medium text-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2;
+  background: var(--aurora-jade-500-hex);
+}
+.btn-primary:hover { background: var(--aurora-jade-600-hex); }
+.btn-primary:focus-visible { box-shadow: 0 0 0 2px white, 0 0 0 4px var(--ion-blue-600-hex); }
+
+.btn-secondary {
+  @apply inline-flex items-center justify-center rounded-xl px-5 py-3 font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2;
+  color: var(--ink-900); background: rgba(255,255,255,0.85);
+}
+.btn-secondary:hover { background: white; }
+.btn-secondary:focus-visible { box-shadow: 0 0 0 2px white, 0 0 0 4px var(--ion-blue-600-hex); }
+
+/* Softer scrim for photo heroes so faces stay vibrant */
+.hero-scrim {
+  background: linear-gradient(90deg, rgba(0,0,0,0.4) 0%, rgba(0,0,0,0.15) 40%, rgba(0,0,0,0) 70%);
+}
+
+/* Hero background kill switch */
+.hero-bg-force { background-image: none !important; }
