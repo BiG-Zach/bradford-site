@@ -8,7 +8,8 @@
     "build": "tsc && vite build",
     "preview": "vite preview",
     "tunnel": "node scripts/tunnel.js",
-    "live": "cross-env NGROK_DOMAIN=bradfordinformedguidance.ngrok-free.app concurrently -k -n VITE,NGROK -c auto \"npm:dev\" \"npm:tunnel\""
+    "live": "cross-env NGROK_DOMAIN=bradfordinformedguidance.ngrok-free.app concurrently -k -n VITE,NGROK -c auto \"npm:dev\" \"npm:tunnel\"",
+    "dev:vercel": "vercel dev"
   },
   "dependencies": {
     "clsx": "^2.1.1",
@@ -16,7 +17,8 @@
     "lucide-react": "^0.539.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "react-router-dom": "^6.22.3"
+    "react-router-dom": "^6.22.3",
+    "jsonwebtoken": "^9.0.2"
   },
   "devDependencies": {
     "@types/node": "^20.12.12",
@@ -34,12 +36,10 @@
     "ts-node": "^10.9.2",
     "typescript": "^5.4.5",
     "vite": "^4.5.14",
-    "wait-on": "^8.0.4"
+    "wait-on": "^8.0.4",
+    "@types/jsonwebtoken": "^9.0.6"
   },
   "engines": {
     "node": ">=18.17"
   }
 }
-
-
-

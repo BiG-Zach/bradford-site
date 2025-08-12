@@ -1,8 +1,10 @@
+import HeroForm from "../components/HeroForm";
 import QuoteQuickstart from "../components/forms/QuoteQuickstart";
 import LogoRail from "../components/marketing/LogoRail";
 import TestimonialsGrid from "../components/social/TestimonialsGrid";
 import USAvailability from "../components/marketing/USAvailability";
 import StickyCTA from "../components/global/StickyCTA";
+import StickyBar from "../components/StickyBar";
 import { BRAND } from "../lib/brand";
 
 const logos = [
@@ -58,14 +60,14 @@ export default function Home() {
             </div>
 
             <div className="hidden md:block">
-              <QuoteQuickstart/>
+              <HeroForm/>
             </div>
           </div>
         </div>
 
         {/* Mobile: form anchored bottom */}
         <div className="absolute bottom-0 inset-x-0 pb-4 md:hidden px-4">
-          <QuoteQuickstart/>
+          <HeroForm/>
         </div>
       </section>
 
@@ -81,6 +83,7 @@ export default function Home() {
       <TestimonialsGrid />
 
       <StickyCTA/>
+      <StickyBar/>
     </main>
   );
 }
