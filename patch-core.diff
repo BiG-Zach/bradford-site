@@ -1,0 +1,276 @@
+diff --git a/package.json b/package.json index 1111111..2222222 100644 --- a/package.json +++ b/package.json @@ -1,16 +1,23 @@ { "name": "bradford-site", "version": "1.0.0", "private": true, "scripts": {
+
+"dev": "vite",
+"dev": "vite",
+"dev:vercel": "vercel dev", "build": "vite build", "preview": "vite preview" }, "dependencies": {
+},
+"jsonwebtoken": "^9.0.2"
+}, "devDependencies": {
+"@types/jsonwebtoken": "^9.0.6", "@types/react": "^18.0.0", "@types/react-dom": "^18.2.0", "typescript": "^5.0.0" } } diff --git a/.env.example b/.env.example new file mode 100644 index 0000000..3333333 100644 --- /dev/null +++ b/.env.example @@ -0,0 +1,11 @@ +# Server-only (do NOT prefix with VITE_) +RINGY_ENDPOINT=https://app.ringy.com/api/public/leads/new-lead +RINGY_SID=your-ringy-sid +RINGY_AUTH_TOKEN=your-ringy-auth-token +JWT_SECRET=change-me-long-random-string +COMPANY_PHONE=+16893256570 +COMPANY_NAME=Bradford Informed Guidance +LEAD_SOURCE=Website – Mobile Hero
++# For local dev with vercel dev, copy this to .env.local and fill values. + diff --git a/api/lead.ts b/api/lead.ts new file mode 100644 index 0000000..4444444 100644 --- /dev/null +++ b/api/lead.ts @@ -0,0 +1,146 @@ +import type { VercelRequest, VercelResponse } from '@vercel/node'; +import jwt from 'jsonwebtoken'; +import crypto from 'node:crypto'; + +function getClientIP(req: VercelRequest) {
+
+const xf = (req.headers['x-forwarded-for'] as string) || '';
+return xf.split(',')[0].trim() || (req.socket?.remoteAddress ?? 'unknown'); +}
++function buildNotes(params: {
+
+ages?: string;
+landingUrl?: string;
+utm?: Record<string, string>;
+consentTimestamp: string;
+ip: string; +}) {
+const utmStr = params.utm ? JSON.stringify(params.utm) : '{}';
+return [
+Ages: ${params.ages || 'n/a'},
+Landing: ${params.landingUrl || 'n/a'},
+UTM: ${utmStr},
+Consent: ${params.consentTimestamp} • ${params.ip}
+].join(' | '); +}
++export default async function handler(req: VercelRequest, res: VercelResponse) {
+
+if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
+try {
+const RINGY_ENDPOINT = process.env.RINGY_ENDPOINT!;
+const RINGY_SID = process.env.RINGY_SID!;
+const RINGY_AUTH_TOKEN = process.env.RINGY_AUTH_TOKEN!;
+const JWT_SECRET = process.env.JWT_SECRET!;
+const LEAD_SOURCE = process.env.LEAD_SOURCE || 'Website – Mobile Hero';
+const {
+ zipCode,
+ ages,
+ email,
+ phone,
+ firstName = '',
+ lastName = '',
+ consentChecked,
+ consentText,
+ landingUrl,
+ utm = {}
+} = (req.body || {}) as Record<string, any>;
+if (!zipCode || !email || !phone || !consentChecked || !consentText) {
+ return res.status(400).json({ error: 'Missing required fields or consent' });
+}
+const ip = getClientIP(req);
+const consentTimestamp = new Date().toISOString();
+const vendorRefId = crypto.randomUUID();
+// Stateless consent receipt (JWT) valid ~10 years
+const token = jwt.sign(
+ { consentText, method: 'checkbox', consentTimestamp, ip, landingUrl, utm },
+ JWT_SECRET,
+ { expiresIn: '3650d' }
+);
+const proto = (req.headers['x-forwarded-proto'] as string) || 'https';
+const host = req.headers.host;
+const proofLink = ${proto}://${host}/api/consent/${token};
+const notes = buildNotes({ ages, landingUrl, utm, consentTimestamp, ip });
+const payload = {
+ sid: RINGY_SID,
+ authToken: RINGY_AUTH_TOKEN,
+ phone_number: phone,
+ first_name: firstName,
+ last_name: lastName,
+ email,
+ zip_code: String(zipCode),
+ lead_source: LEAD_SOURCE,
+ notes,
+ vendor_reference_id: vendorRefId,
+ proof_of_sms_opt_in_link: proofLink
+};
+const resp = await fetch(RINGY_ENDPOINT, {
+ method: 'POST',
+ headers: { 'Content-Type': 'application/json' },
+ body: JSON.stringify(payload)
+});
+const text = await resp.text();
+if (!resp.ok) {
+ return res.status(resp.status).json({ error: 'Ringy error', detail: text });
+}
+let vendorResponse: any;
+try { vendorResponse = JSON.parse(text); } catch { vendorResponse = { raw: text }; }
+return res.status(200).json({ ok: true, vendorResponse });
+} catch (err: any) {
+return res.status(500).json({ error: 'Server error', detail: err?.message || String(err) });
+} +} diff --git a/api/consent/[token].ts b/api/consent/[token].ts new file mode 100644 index 0000000..5555555 100644 --- /dev/null +++ b/api/consent/[token].ts @@ -0,0 +1,21 @@ +import type { VercelRequest, VercelResponse } from '@vercel/node'; +import jwt from 'jsonwebtoken';
++export default async function handler(req: VercelRequest, res: VercelResponse) {
+
+const { token } = req.query as { token: string };
+const JWT_SECRET = process.env.JWT_SECRET!;
+try {
+const data = jwt.verify(token, JWT_SECRET);
+return res.status(200).json({ ok: true, ...data });
+} catch {
+return res.status(400).json({ error: 'Invalid or expired token' });
+} +} diff --git a/src/components/HeroForm.tsx b/src/components/HeroForm.tsx new file mode 100644 index 0000000..6666666 100644 --- /dev/null +++ b/src/components/HeroForm.tsx @@ -0,0 +1,190 @@ +import React, { useState } from 'react';
++export default function HeroForm() {
+
+const [firstName, setFirst] = useState('');
+const [lastName, setLast] = useState('');
+const [zipCode, setZip] = useState('');
+const [ages, setAges] = useState('');
+const [email, setEmail] = useState('');
+const [phone, setPhone] = useState('');
+const [consent, setConsent] = useState(false);
+const [loading, setLoading] = useState(false);
+const [error, setError] = useState('');
+const [ok, setOk] = useState(false);
+const onSubmit = async (e: React.FormEvent) => {
+e.preventDefault();
+setError('');
+if (!firstName || !lastName || !zipCode || !email || !phone) {
+ setError('First, Last, ZIP, Email, and Phone are required.');
+ return;
+}
+if (!consent) { setError('Please agree to the consent to continue.'); return; }
+setLoading(true);
+try {
+ const utm = Object.fromEntries(new URLSearchParams(window.location.search));
+ const consentText =
+   'By submitting, you agree Bradford Informed Guidance may call and text you at the number provided (including via autodialer). Consent is not a condition of purchase. Message/data rates may apply.';
+ const body = {
+   firstName, lastName, zipCode, ages, email, phone,
+   consentChecked: true, consentText,
+   landingUrl: window.location.href, utm
+ };
+ const resp = await fetch('/api/lead', {
+   method: 'POST', headers: { 'Content-Type': 'application/json' },
+   body: JSON.stringify(body)
+ });
+ if (!resp.ok) {
+   const j = await resp.json().catch(() => ({}));
+   throw new Error(j?.detail || 'Submission failed. Please call (689) 325-6570.');
+ }
+ setOk(true);
+} catch (err: any) { setError(err.message || 'Something went wrong. Please call (689) 325-6570.'); }
+finally { setLoading(false); }
+};
+return (
+ <div className="max-w-md mx-auto bg-white/95 backdrop-blur-sm p-6 rounded-2xl shadow-2xl border border-white/20">
+   <div className="text-center mb-6">
+     <h1 className="text-2xl font-bold text-gray-900 leading-tight">Premium Health & Life Coverage</h1>
+     <p className="text-emerald-600 font-semibold text-lg">Clear. Fast. Year-Round.</p>
+     <div className="text-sm text-gray-600 mt-2">Licensed FL • MI • NC • Expanding Nationwide</div>
+   </div>
+   <form onSubmit={onSubmit} id="mobileQuoteForm" className="space-y-4">
+     <div className="grid grid-cols-2 gap-3">
+       <div>
+         <label className="block text-sm font-semibold text-gray-700 mb-2">First name</label>
+         <input value={firstName} onChange={e => setFirst(e.target.value)}
+                className="w-full p-4 border-2 rounded-xl text-base focus:border-emerald-500" required />
+       </div>
+       <div>
+         <label className="block text-sm font-semibold text-gray-700 mb-2">Last name</label>
+         <input value={lastName} onChange={e => setLast(e.target.value)}
+                className="w-full p-4 border-2 rounded-xl text-base focus:border-emerald-500" required />
+       </div>
+     </div>
+     <div>
+       <label className="block text-sm font-semibold text-gray-700 mb-2">ZIP Code</label>
+       <input value={zipCode} onChange={e => setZip(e.target.value.replace(/\D/g, '').slice(0,5))}
+              inputMode="numeric" className="w-full p-4 border-2 rounded-xl text-base focus:border-emerald-500" required />
+     </div>
+     <div>
+       <label className="block text-sm font-semibold text-gray-700 mb-2">Ages (comma-separated)</label>
+       <input value={ages} onChange={e => setAges(e.target.value)}
+              className="w-full p-4 border-2 rounded-xl text-base focus:border-emerald-500" placeholder="39, 37, 12" />
+     </div>
+     <div>
+       <label className="block text-sm font-semibold text-gray-700 mb-2">Email</label>
+       <input type="email" value={email} onChange={e => setEmail(e.target.value)}
+              className="w-full p-4 border-2 rounded-xl text-base focus:border-emerald-500" required />
+     </div>
+     <div>
+       <label className="block text-sm font-semibold text-gray-700 mb-2">Phone</label>
+       <input type="tel" value={phone} onChange={e => setPhone(e.target.value)}
+              className="w-full p-4 border-2 rounded-xl text-base focus:border-emerald-500" required />
+     </div>
+     <div className="flex items-start space-x-3">
+       <input id="consent" type="checkbox" checked={consent} onChange={e => setConsent(e.target.checked)}
+              className="mt-1 h-5 w-5" />
+       <label htmlFor="consent" className="text-sm text-gray-600">
+         By submitting, you agree Bradford Informed Guidance may call and text you at the number provided (including via autodialer).
+         Consent is not a condition of purchase. Message/data rates may apply.
+       </label>
+     </div>
+     {error && <div className="text-red-600 text-sm">{error}</div>}
+     {ok ? (
+       <div className="text-emerald-600 font-semibold">Thanks! We’ll send your options within 45–90 minutes.</div>
+     ) : (
+       <button disabled={loading} type="submit"
+               className="w-full bg-emerald-600 text-white py-4 rounded-xl font-bold text-lg">
+         {loading ? 'Processing…' : 'Get My Custom Quote'}
+       </button>
+     )}
+     <a href="tel:+16893256570" className="block w-full bg-gray-800 text-white mt-3 py-4 rounded-xl text-center font-bold text-lg">
+       Call Now — (689) 325-6570
+     </a>
+     <div className="text-xs text-gray-500 mt-3 text-center">⚡ First options in 45–90 minutes • Mon–Sun 8AM–8PM EST</div>
+   </form>
+ </div>
+); +} diff --git a/src/components/StickyBar.tsx b/src/components/StickyBar.tsx new file mode 100644 index 0000000..7777777 100644 --- /dev/null +++ b/src/components/StickyBar.tsx @@ -0,0 +1,58 @@ +import React, { useEffect, useState } from 'react';
++export default function StickyBar() {
+
+const [visible, setVisible] = useState(false);
+useEffect(() => {
+const sentinel = document.getElementById('sticky-sentinel') || document.body;
+const io = new IntersectionObserver(
+ (entries) => entries.forEach((e) => setVisible(!e.isIntersecting)),
+ { rootMargin: '0px', threshold: [0, 1] }
+);
+io.observe(sentinel);
+return () => io.disconnect();
+}, []);
+return (
+<>
+ <div id="sticky-sentinel" aria-hidden="true" className="h-1 w-full" />
+ <div
+   className={[
+     'fixed bottom-0 left-0 right-0 z-50 bg-white border-t-2 border-emerald-500 shadow-2xl transition-transform duration-300 lg:hidden',
+     visible ? 'translate-y-0' : 'translate-y-full'
+   ].join(' ')}
+ >
+   <div className="px-4 py-3">
+     <div className="grid grid-cols-2 gap-3">
+       <a href="tel:+16893256570" className="flex items-center justify-center bg-gray-800 text-white py-3 px-4 rounded-lg font-semibold text-sm hover:bg-gray-900">
+         Call Now
+       </a>
+       <button
+         onClick={() => document.getElementById('mobileQuoteForm')?.scrollIntoView({ behavior: 'smooth', block: 'center' })}
+         className="flex items-center justify-center bg-emerald-600 text-white py-3 px-4 rounded-lg font-semibold text-sm hover:bg-emerald-700"
+       >
+         Get Quote
+       </button>
+     </div>
+     <div className="text-center text-xs text-gray-500 mt-2">Response in 45–90 minutes • Mon–Sun 8AM–8PM EST</div>
+   </div>
+ </div>
+</>
+); +} diff --git a/src/components/CarrierGrid.tsx b/src/components/CarrierGrid.tsx new file mode 100644 index 0000000..8888888 100644 --- /dev/null +++ b/src/components/CarrierGrid.tsx @@ -0,0 +1,74 @@ +import React from 'react';
++const logos = [
+
+{ key: 'aetna', alt: 'Aetna Health Insurance – PPO Network', src: '/logos/carriers/aetna.svg' },
+{ key: 'cigna', alt: 'Cigna Health Insurance – PPO Network', src: '/logos/carriers/cigna.svg' },
+{ key: 'unitedhealthcare', alt: 'UnitedHealthcare – PPO Network', src: '/logos/carriers/unitedhealthcare.svg' },
+{ key: 'anthem', alt: 'Anthem Blue Cross Blue Shield – PPO Network', src: '/logos/carriers/anthem.svg' },
+{ key: 'humana', alt: 'Humana – PPO Network', src: '/logos/carriers/humana.svg' },
+{ key: 'allstate', alt: 'Allstate Health Solutions – PPO Network', src: '/logos/carriers/allstate.svg' } +];
++export default function CarrierGrid() {
+
+return (
+ <div className="container mx-auto px-4">
+   <div className="text-center mb-8">
+     <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-2">Trusted Partnership Network</h2>
+     <p className="text-gray-600 text-lg">Exclusive access to top-rated PPO carriers nationwide</p>
+   </div>
+   <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6 items-center justify-items-center">
+     {logos.map((l) => (
+       <div key={l.key} className="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow w-full h-20 flex items-center justify-center">
+         <img src={l.src} alt={l.alt} className="max-h-12 w-auto object-contain" loading="lazy" height={48} />
+       </div>
+     ))}
+   </div>
+   <div className="text-center mt-8">
+     <p className="text-sm text-gray-600 max-w-2xl mx-auto">
+       All carriers are A+ rated with AM Best. We don’t use discount plans or limited networks.
+     </p>
+   </div>
+ </div>
+); +}
