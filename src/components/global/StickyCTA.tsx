@@ -4,34 +4,59 @@ export default function StickyCTA() {
   const [visible, setVisible] = React.useState(false);
 
   React.useEffect(() => {
-    const el = document.getElementById('mobileQuoteForm');
-    if (!el) { setVisible(true); return; } // show if not found (fail-open)
+    if (typeof window === 'undefined') return;
 
-    const update = () => {
-      const r = el.getBoundingClientRect();
+    const isMobile = () =>
+      (window.innerWidth || document.documentElement.clientWidth) < 768;
+
+    const formEl = document.getElementById('mobileQuoteForm');
+    const sentinelEl = document.querySelector('[data-hero-sentinel]') as HTMLElement | null;
+    const target = formEl ?? sentinelEl;
+
+    // Fail-closed: hide by default if no target or not mobile
+    if (!isMobile() || !target) {
+      setVisible(false);
+      return;
+    }
+
+    const onResize = () => {
+      if (!isMobile()) setVisible(false);
+    };
+    window.addEventListener('resize', onResize);
+
+    const io = new IntersectionObserver(
+      (entries) => {
+        const entry = entries[0];
+        const ratio = entry?.intersectionRatio ?? 0;
+        // Hide while form/sentinel is ≥ 25% visible; show after hero is off-screen
+        setVisible(ratio < 0.25);
+      },
+      {
+        threshold: [0, 0.01, 0.1, 0.25, 0.5, 0.75, 1],
+        rootMargin: '0px 0px -120px 0px',
+      }
+    );
+
+    io.observe(target);
+
+    // Initialize visibility once
+    try {
+      const r = target.getBoundingClientRect();
       const vh = window.innerHeight || document.documentElement.clientHeight;
       const visiblePx = Math.max(0, Math.min(r.bottom, vh) - Math.max(r.top, 0));
-      const ratio = visiblePx / Math.max(1, r.height);
-      // Show sticky only when ≤ 40% of the form is visible in the viewport
-      setVisible(ratio <= 0.4);
-    };
-
-    update();
-    window.addEventListener('scroll', update, { passive: true });
-    window.addEventListener('resize', update);
-    const io = new IntersectionObserver(update, { threshold: [0, 0.25, 0.5, 0.75, 1] });
-    io.observe(el);
+      const ratio = r.height > 0 ? visiblePx / r.height : 0;
+      setVisible(ratio < 0.25);
+    } catch {}
 
     return () => {
-      window.removeEventListener('scroll', update);
-      window.removeEventListener('resize', update);
+      window.removeEventListener('resize', onResize);
       io.disconnect();
     };
   }, []);
 
   const onQuote = () => {
     const el = document.getElementById('mobileQuoteForm');
-    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
 
   if (!visible) return null;

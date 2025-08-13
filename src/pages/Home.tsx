@@ -67,6 +67,8 @@ export default function Home() {
           <HeroForm/>
         </div>
       </section>
+      {/* Hero sentinel for sticky CTA visibility */}
+      <div data-hero-sentinel style={{ height: 1 }} />
 
       <section className="py-10 md:py-12 bg-band">
         <div className="container mx-auto px-4">
