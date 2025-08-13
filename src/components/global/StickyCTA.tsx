@@ -9,48 +9,37 @@ export default function StickyCTA() {
     const isMobile = () =>
       (window.innerWidth || document.documentElement.clientWidth) < 768;
 
-    const formEl = document.getElementById('mobileQuoteForm');
-    const sentinelEl = document.querySelector('[data-hero-sentinel]') as HTMLElement | null;
-    const target = formEl ?? sentinelEl;
-
-    // Fail-closed: hide by default if no target or not mobile
-    if (!isMobile() || !target) {
-      setVisible(false);
-      return;
-    }
-
+    let mobile = isMobile();
     const onResize = () => {
-      if (!isMobile()) setVisible(false);
+      mobile = isMobile();
+      if (!mobile) setVisible(false);
     };
     window.addEventListener('resize', onResize);
+    window.addEventListener('orientationchange', onResize);
+
+    const formEl = document.getElementById('mobileQuoteForm');
+    const sentinelEl = document.querySelector('[data-hero-sentinel]') as HTMLElement | null;
+    const target = formEl || sentinelEl;
+
+    if (!target || !mobile) return () => {
+      window.removeEventListener('resize', onResize);
+      window.removeEventListener('orientationchange', onResize);
+    };
 
     const io = new IntersectionObserver(
-      (entries) => {
-        const entry = entries[0];
-        const ratio = entry?.intersectionRatio ?? 0;
-        // Hide while form/sentinel is ≥ 25% visible; show after hero is off-screen
-        setVisible(ratio < 0.25);
+      ([entry]) => {
+        const mostlyVisible = !!entry?.isIntersecting && (entry.intersectionRatio > 0.25);
+        setVisible(!mostlyVisible);
       },
-      {
-        threshold: [0, 0.01, 0.1, 0.25, 0.5, 0.75, 1],
-        rootMargin: '0px 0px -120px 0px',
-      }
+      { threshold: [0, 0.25, 0.5, 1], rootMargin: '0px 0px -120px 0px' }
     );
 
     io.observe(target);
 
-    // Initialize visibility once
-    try {
-      const r = target.getBoundingClientRect();
-      const vh = window.innerHeight || document.documentElement.clientHeight;
-      const visiblePx = Math.max(0, Math.min(r.bottom, vh) - Math.max(r.top, 0));
-      const ratio = r.height > 0 ? visiblePx / r.height : 0;
-      setVisible(ratio < 0.25);
-    } catch {}
-
     return () => {
-      window.removeEventListener('resize', onResize);
       io.disconnect();
+      window.removeEventListener('resize', onResize);
+      window.removeEventListener('orientationchange', onResize);
     };
   }, []);
 

@@ -2,7 +2,6 @@ import { Suspense } from 'react';
 import { Outlet, Link } from 'react-router-dom';
 import Header from './components/Header';
 import Footer from './components/Footer';
-import StickyCTA from './components/StickyCTA';
 import BrandBar from './components/BrandBar';
 
 export default function App() {
@@ -25,7 +24,6 @@ export default function App() {
         </Suspense>
       </div>
       <Footer />
-      <StickyCTA />
       {/* Safety net: if Outlet renders nothing for any reason, show a visible hint */}
       <noscript>
         <div className="p-4 text-center text-red-600">

@@ -43,7 +43,7 @@ export default function Home() {
         <div className="relative z-10 h-full flex items-center">
           <div className="container mx-auto px-4 grid md:grid-cols-[1.1fr_0.9fr] gap-6 items-center">
             <div className="max-w-2xl">
-              <h1 className="text-[clamp(26px,5vw,34px)] md:text-5xl lg:text-6xl leading-[1.15] tracking-[-0.01em] mb-2 font-bold text-white drop-shadow-[0_2px_10px_rgba(0,0,0,0.6)]">
+              <h1 className="text-[clamp(26px,5vw,34px)] md:text-5xl lg:text-6xl leading-[1.15] tracking-[-0.01em] mb-[10px] font-bold text-white drop-shadow-[0_2px_10px_rgba(0,0,0,0.6)]">
                 Private Health & Life Guidance. Clear. Fast. Year-Round.
               </h1>
               <p className="mt-3 text-white/90 text-lg">
