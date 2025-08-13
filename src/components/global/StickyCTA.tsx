@@ -6,98 +6,60 @@ export default function StickyCTA() {
   React.useEffect(() => {
     if (typeof window === 'undefined') return;
 
-    const isMobile = () =>
-      (window.innerWidth || document.documentElement.clientWidth) < 768;
+    // Mobile-only gate (never affect desktop >= 768px)
+    const isMobile = (window.innerWidth || 0) < 768;
+    if (!isMobile) return;
 
-    let mobile = isMobile();
-    const onResize = () => {
-      mobile = isMobile();
-      if (!mobile) setVisible(false);
+    const root = document.documentElement;
+    const setAttr = (v: boolean) => root.setAttribute('data-sticky-cta-visible', String(v));
+
+    // Fail-closed target: require the mobile quote form
+    const el = document.getElementById('mobileQuoteForm');
+    if (!el) {
+      setVisible(false);
+      setAttr(false);
+      return;
+    }
+
+    // Toggle visibility after the form is mostly out of view (≤ 40% visible)
+    const update = () => {
+      const r = el.getBoundingClientRect();
+      const vh = window.innerHeight || document.documentElement.clientHeight;
+      const visiblePx = Math.max(0, Math.min(r.bottom, vh) - Math.max(r.top, 0));
+      const ratio = visiblePx / Math.max(1, r.height);
+      const next = ratio <= 0.4;
+      setVisible(next);
+      setAttr(next);
     };
-    window.addEventListener('resize', onResize);
-    window.addEventListener('orientationchange', onResize);
 
-    const formEl = document.getElementById('mobileQuoteForm');
-    const sentinelEl = document.querySelector('[data-hero-sentinel]') as HTMLElement | null;
-    const target = formEl || sentinelEl;
+    update();
+    window.addEventListener('scroll', update, { passive: true } as EventListenerOptions);
+    window.addEventListener('resize', update);
 
-    if (!target || !mobile)
-      return () => {
-        window.removeEventListener('resize', onResize);
-        window.removeEventListener('orientationchange', onResize);
-      };
-
-    const io = new IntersectionObserver(
-      ([entry]) => {
-        const mostlyVisible = !!entry?.isIntersecting && entry.intersectionRatio > 0.25;
-        setVisible(!mostlyVisible);
-      },
-      { threshold: [0, 0.25, 0.5, 1], rootMargin: '0px 0px -120px 0px' }
-    );
-
-    io.observe(target);
+    const io = new IntersectionObserver(() => update(), {
+      threshold: [0, 0.25, 0.5, 0.75, 1],
+      rootMargin: '0px 0px -120px 0px',
+    });
+    io.observe(el);
 
     return () => {
+      window.removeEventListener('scroll', update);
+      window.removeEventListener('resize', update);
       io.disconnect();
-      window.removeEventListener('resize', onResize);
-      window.removeEventListener('orientationchange', onResize);
+      setAttr(false);
     };
   }, []);
 
-  // Keep only one primary CTA visible on mobile:
-  // When the sticky CTA is visible, hide the header's mobile CTA and flag HTML for CSS.
-  React.useEffect(() => {
-    if (typeof window === 'undefined' || typeof document === 'undefined') return;
-
-    const w = window as any;
-    if (typeof w.___stickyCTAVisibleCount !== 'number') {
-      w.___stickyCTAVisibleCount = 0;
-    }
-
-    const updateFlags = () => {
-      const el = document.getElementById('headerMobileCTA');
-      const count = Number(w.___stickyCTAVisibleCount || 0);
-
-      // Toggle header CTA visibility attribute (existing behavior)
-      if (el) {
-        if (count > 0) {
-          el.setAttribute('data-hidden-by-sticky', 'true');
-        } else {
-          el.removeAttribute('data-hidden-by-sticky');
-        }
-      }
-
-      // Toggle html flag used by CSS ([data-sticky-cta-visible="true"])
-      const root = document.documentElement;
-      if (count > 0) {
-        root.setAttribute('data-sticky-cta-visible', 'true');
-      } else {
-        root.removeAttribute('data-sticky-cta-visible');
-      }
-    };
-
-    if (visible) {
-      w.___stickyCTAVisibleCount++;
-      updateFlags();
-    }
-
-    return () => {
-      if (visible) {
-        w.___stickyCTAVisibleCount = Math.max(0, (w.___stickyCTAVisibleCount || 0) - 1);
-        updateFlags();
-      }
-    };
-  }, [visible]);
-
   const onQuote = () => {
     const el = document.getElementById('mobileQuoteForm');
-    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'center' });
   };
 
   if (!visible) return null;
 
   return (
     <div
+      data-sticky-cta
       className="fixed inset-x-0 bottom-0 z-[90] md:hidden bg-white/95 backdrop-blur border-t border-slate-200"
       style={{ paddingBottom: 'calc(env(safe-area-inset-bottom))' }}
     >
@@ -109,12 +71,15 @@ export default function StickyCTA() {
         >
           Get Quote
         </button>
+
+        {/* Mirror header CTA action/attributes for CRM consistency */}
         <a
-          href="tel:+16893256570"
+          href="https://calendly.com/bradfordinformedguidance"
+          aria-label="Schedule"
           className="flex-1 inline-flex items-center justify-center rounded-xl ring-1 ring-slate-300 px-4 py-3 font-semibold"
           style={{ minHeight: '48px' }}
         >
-          Call Now
+          Schedule
         </a>
       </div>
     </div>

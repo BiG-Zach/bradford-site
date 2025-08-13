@@ -27,7 +27,7 @@ export default function Header() {
         <a
           id="headerMobileCTA"
           href="https://calendly.com/bradfordinformedguidance"
-          className="md:hidden inline-flex items-center justify-center rounded-2xl font-semibold transition-transform duration-200 transition-opacity duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[#005ea2] active:scale-[0.98] px-4 py-3 text-base bg-[#005ea2] text-white shadow-sm min-h-[44px] min-w-[44px] data-[hidden-by-sticky=true]:opacity-0 data-[hidden-by-sticky=true]:pointer-events-none data-[hidden-by-sticky=true]:invisible"
+          className="md:hidden inline-flex items-center justify-center rounded-2xl font-semibold transition duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-[#005ea2] active:scale-[0.98] px-4 py-3 text-base bg-[#005ea2] text-white shadow-sm min-h-[44px] min-w-[44px] data-[hidden-by-sticky=true]:opacity-0 data-[hidden-by-sticky=true]:pointer-events-none data-[hidden-by-sticky=true]:invisible"
           aria-label="Schedule"
         >
           Schedule
