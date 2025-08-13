@@ -4,13 +4,19 @@ import { Outlet, Link } from 'react-router-dom';
 import Header from './components/Header';
 import Footer from './components/Footer';
 import BrandBar from './components/BrandBar';
+import MobileHeader from './mobile/MobileHeader';
 
 export default function App() {
   return (
     <div className="min-h-screen flex flex-col">
       <a href="#content" className="skip-to-content">Skip to content</a>
       <BrandBar />
-      <Header />
+      <div className="hidden md:block">
+        <Header />
+      </div>
+      <div className="block md:hidden">
+        <MobileHeader />
+      </div>
       <div id="content" className="flex-1">
         <Suspense
           fallback={
