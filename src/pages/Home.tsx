@@ -4,31 +4,28 @@ import LogoRail from "../components/marketing/LogoRail";
 import TestimonialsGrid from "../components/social/TestimonialsGrid";
 import USAvailability from "../components/marketing/USAvailability";
 import StickyCTA from "../components/global/StickyCTA";
-import StickyBar from "../components/StickyBar";
 import { BRAND } from "../lib/brand";
 
 const logos = [
-  { src: "/logos/aetna.webp", alt: "Aetna health insurance carrier" },
-  { src: "/logos/cigna.webp", alt: "Cigna health insurance carrier" },
-  { src: "/logos/americo.webp", alt: "Americo life insurance carrier" },
-  { src: "/logos/multiplan.webp", alt: "MultiPlan PPO network provider" },
-  { src: "/logos/allstate.webp", alt: "Allstate Health Solutions insurance carrier" },
-  { src: "/logos/uhc.webp", alt: "UnitedHealthcare insurance carrier" },
-  { src: "/logos/palic.webp", alt: "Philadelphia American Life Insurance Company" },
-  { src: "/logos/firsthealth.webp", alt: "First Health Network PPO provider" },
-  { src: "/logos/sgic.webp", alt: "SGIC health insurance carrier" },
-  { src: "/logos/mutualofomaha.webp", alt: "Mutual of Omaha insurance carrier" },
-  { src: "/logos/aflac.webp", alt: "Aflac supplemental insurance" },
-  // TODO: Add Aflac and Blue Cross Blue Shield logos once the actual .webp files are added to src/assets/logos/
-  // { src: "/logos/aflac.webp", alt: "Aflac supplemental insurance carrier" },
-  // { src: blueCrossLogo, alt: "Blue Cross Blue Shield health insurance carrier" },
+  { src: "/logos/carriers/aetna.webp", alt: "Aetna health insurance carrier" },
+  { src: "/logos/carriers/cigna.webp", alt: "Cigna health insurance carrier" },
+  { src: "/logos/carriers/americo.webp", alt: "Americo life insurance carrier" },
+  { src: "/logos/carriers/multiplan.webp", alt: "MultiPlan PPO network provider" },
+  { src: "/logos/carriers/allstate.webp", alt: "Allstate Health Solutions insurance carrier" },
+  { src: "/logos/carriers/unitedhealthcare.webp", alt: "UnitedHealthcare insurance carrier" },
+  { src: "/logos/carriers/firsthealth.webp", alt: "First Health PPO network provider" },
+  { src: "/logos/carriers/bluecrossblueshield.png", alt: "Blue Cross Blue Shield" },
+  { src: "/logos/carriers/sgic.webp", alt: "Southern Guaranty Insurance Company (SGIC)" },
+  { src: "/logos/carriers/mutualofomaha.webp", alt: "Mutual of Omaha life insurance" },
+  { src: "/logos/carriers/pal.webp", alt: "Philadelphia American Life (PAL)" },
+  { src: "/logos/carriers/aflac.webp", alt: "Aflac supplemental" }
 ];
 
 export default function Home() {
   return (
     <main className="relative">
       <section
-        className="relative w-full min-h-[82vh] md:min-h-[84vh] overflow-hidden hero-bg-force"
+        className="relative w-full min-h-[82vh] md:min-h-[84vh] overflow-hidden hero-bg-force pt-[calc(var(--header-h,56px)+env(safe-area-inset-top))]"
         aria-label="Hero"
       >
         {/* BACKGROUND IMAGE — ONLY LAYER */}
@@ -46,7 +43,7 @@ export default function Home() {
         <div className="relative z-10 h-full flex items-center">
           <div className="container mx-auto px-4 grid md:grid-cols-[1.1fr_0.9fr] gap-6 items-center">
             <div className="max-w-2xl">
-              <h1 className="text-4xl md:text-5xl font-bold text-white drop-shadow-[0_2px_10px_rgba(0,0,0,0.6)]">
+              <h1 className="text-[clamp(26px,5vw,34px)] md:text-5xl lg:text-6xl leading-[1.15] tracking-[-0.01em] mb-2 font-bold text-white drop-shadow-[0_2px_10px_rgba(0,0,0,0.6)]">
                 Private Health & Life Guidance. Clear. Fast. Year-Round.
               </h1>
               <p className="mt-3 text-white/90 text-lg">
@@ -83,7 +80,6 @@ export default function Home() {
       <TestimonialsGrid />
 
       <StickyCTA/>
-      <StickyBar/>
     </main>
   );
 }
