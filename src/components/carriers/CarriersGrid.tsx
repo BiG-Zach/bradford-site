@@ -1,5 +1,4 @@
 import * as React from 'react';
-import Image from 'next/image';
 
 type Carrier = { name: string; src: string };
 
@@ -50,14 +49,16 @@ export default function CarriersGrid() {
             key={name}
             className="rounded-2xl border border-slate-200 bg-white/70 backdrop-blur-sm p-3 shadow-sm"
           >
+            {/* CLS-safe wrapper */}
             <div className="relative aspect-[2/1] w-full">
-              <Image
+              <img
                 src={src}
                 alt={name}
-                fill
-                sizes="(max-width: 640px) 45vw, (max-width: 768px) 30vw, 20vw"
-                style={{ objectFit: 'contain' }}
-                priority={false}
+                width={160}
+                height={80}
+                loading="lazy"
+                decoding="async"
+                className="absolute inset-0 h-full w-full object-contain"
               />
             </div>
             <p className="mt-2 text-center text-sm text-slate-700">{name}</p>
@@ -71,3 +72,4 @@ export default function CarriersGrid() {
     </section>
   );
 }
+

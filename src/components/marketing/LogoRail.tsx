@@ -4,8 +4,18 @@ export default function LogoRail({ logos, className="" }: { logos: Logo[]; class
   return (
     <div className={`grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4 items-center ${className}`}>
       {logos.map((l,i)=>(
-        <div key={i} className="h-16 md:h-20 flex items-center justify-center rounded-xl bg-white/60 shadow-sm border border-white/40 hover:scale-[1.02] hover:shadow-md transition-transform">
-          <img src={l.src} alt={l.alt} loading="lazy" width={l.width ?? 156} height={l.height ?? 64} className="max-h-10 md:max-h-12 w-auto opacity-70 hover:opacity-100 transition-opacity" />
+        <div key={i} className="h-16 md:h-20 flex items-center justify-center rounded-2xl border border-slate-200 bg-white/70 backdrop-blur-sm p-3 shadow-sm">
+          <div className="relative aspect-[2/1] w-full">
+            <img
+              src={l.src}
+              alt={l.alt}
+              width={l.width ?? 160}
+              height={l.height ?? 80}
+              loading="lazy"
+              decoding="async"
+              className="absolute inset-0 h-full w-full object-contain"
+            />
+          </div>
         </div>
       ))}
     </div>
