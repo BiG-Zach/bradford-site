@@ -63,7 +63,7 @@ export default function Home() {
         </div>
 
         {/* Mobile: form anchored bottom */}
-        <div className="absolute bottom-0 inset-x-0 pb-4 md:hidden px-4">
+        <div id="mobileQuoteForm" className="absolute bottom-0 inset-x-0 pb-4 md:hidden px-4">
           <HeroForm/>
         </div>
       </section>

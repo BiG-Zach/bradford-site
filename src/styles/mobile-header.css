@@ -1,0 +1,12 @@
+/* Mobile-only rules to deduplicate CTAs without affecting desktop (≤767px) */
+@media (max-width: 767px) {
+  /* Hide header CTA while sticky CTA is visible */
+  [data-sticky-cta-visible="true"] #headerMobileCTA {
+    display: none !important;
+  }
+
+  /* Optional: reserve space so sticky doesn't cover content */
+  html[data-sticky-cta-visible="true"] body {
+    padding-bottom: calc(72px + env(safe-area-inset-bottom));
+  }
+}

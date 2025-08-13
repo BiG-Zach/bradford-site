@@ -43,14 +43,14 @@ export default function CarriersGrid() {
         />
       </div>
 
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 sm:gap-6">
         {filtered.map(({name, src}) => (
           <div
             key={name}
             className="rounded-2xl border border-slate-200 bg-white/70 backdrop-blur-sm p-3 shadow-sm"
           >
-            {/* CLS-safe wrapper */}
-            <div className="relative aspect-[2/1] w-full">
+            {/* Mobile: CLS-safe wider ratio; Desktop: unchanged */}
+            <div className="relative w-full aspect-[3/1] md:aspect-[2/1]">
               <img
                 src={src}
                 alt={name}

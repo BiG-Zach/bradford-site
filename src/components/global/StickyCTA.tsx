@@ -21,14 +21,15 @@ export default function StickyCTA() {
     const sentinelEl = document.querySelector('[data-hero-sentinel]') as HTMLElement | null;
     const target = formEl || sentinelEl;
 
-    if (!target || !mobile) return () => {
-      window.removeEventListener('resize', onResize);
-      window.removeEventListener('orientationchange', onResize);
-    };
+    if (!target || !mobile)
+      return () => {
+        window.removeEventListener('resize', onResize);
+        window.removeEventListener('orientationchange', onResize);
+      };
 
     const io = new IntersectionObserver(
       ([entry]) => {
-        const mostlyVisible = !!entry?.isIntersecting && (entry.intersectionRatio > 0.25);
+        const mostlyVisible = !!entry?.isIntersecting && entry.intersectionRatio > 0.25;
         setVisible(!mostlyVisible);
       },
       { threshold: [0, 0.25, 0.5, 1], rootMargin: '0px 0px -120px 0px' }
@@ -42,6 +43,51 @@ export default function StickyCTA() {
       window.removeEventListener('orientationchange', onResize);
     };
   }, []);
+
+  // Keep only one primary CTA visible on mobile:
+  // When the sticky CTA is visible, hide the header's mobile CTA and flag HTML for CSS.
+  React.useEffect(() => {
+    if (typeof window === 'undefined' || typeof document === 'undefined') return;
+
+    const w = window as any;
+    if (typeof w.___stickyCTAVisibleCount !== 'number') {
+      w.___stickyCTAVisibleCount = 0;
+    }
+
+    const updateFlags = () => {
+      const el = document.getElementById('headerMobileCTA');
+      const count = Number(w.___stickyCTAVisibleCount || 0);
+
+      // Toggle header CTA visibility attribute (existing behavior)
+      if (el) {
+        if (count > 0) {
+          el.setAttribute('data-hidden-by-sticky', 'true');
+        } else {
+          el.removeAttribute('data-hidden-by-sticky');
+        }
+      }
+
+      // Toggle html flag used by CSS ([data-sticky-cta-visible="true"])
+      const root = document.documentElement;
+      if (count > 0) {
+        root.setAttribute('data-sticky-cta-visible', 'true');
+      } else {
+        root.removeAttribute('data-sticky-cta-visible');
+      }
+    };
+
+    if (visible) {
+      w.___stickyCTAVisibleCount++;
+      updateFlags();
+    }
+
+    return () => {
+      if (visible) {
+        w.___stickyCTAVisibleCount = Math.max(0, (w.___stickyCTAVisibleCount || 0) - 1);
+        updateFlags();
+      }
+    };
+  }, [visible]);
 
   const onQuote = () => {
     const el = document.getElementById('mobileQuoteForm');
@@ -74,4 +120,3 @@ export default function StickyCTA() {
     </div>
   );
 }
-
