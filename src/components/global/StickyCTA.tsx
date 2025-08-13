@@ -5,27 +5,20 @@ export default function StickyCTA() {
 
   React.useEffect(() => {
     const el = document.getElementById('mobileQuoteForm');
-    if (!el) { setVisible(true); return; } // fail-open if form not found
+    if (!el) { setVisible(true); return; } // show if not found (fail-open)
 
-    // Robust visibility check: percent of the form currently visible in the viewport
     const update = () => {
       const r = el.getBoundingClientRect();
       const vh = window.innerHeight || document.documentElement.clientHeight;
-
-      // Visible pixels of the element in the viewport
       const visiblePx = Math.max(0, Math.min(r.bottom, vh) - Math.max(r.top, 0));
       const ratio = visiblePx / Math.max(1, r.height);
-
-      // Show sticky only when ≤ 40% of the form is visible
+      // Show sticky only when ≤ 40% of the form is visible in the viewport
       setVisible(ratio <= 0.4);
     };
 
-    // Run once and on scroll/resize for accuracy
     update();
     window.addEventListener('scroll', update, { passive: true });
     window.addEventListener('resize', update);
-
-    // Also observe for layout shifts
     const io = new IntersectionObserver(update, { threshold: [0, 0.25, 0.5, 0.75, 1] });
     io.observe(el);
 
