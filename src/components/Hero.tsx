@@ -24,9 +24,14 @@ const Hero = ({
   };
 
   return (
-    <header className="relative isolate overflow-hidden">
+    <header
+      className="relative isolate overflow-hidden"
+      style={{
+        paddingTop: 'calc(var(--header-h, 56px) + env(safe-area-inset-top))'
+      }}
+    >
       {/* Background image */}
-      <div className="relative min-h-[70vh] md:min-h-[78vh]">
+      <div className="relative min-h-[60vh] sm:min-h-[70vh] md:min-h-[78vh]">
         <img
           src={bg}
           alt=""
@@ -47,9 +52,15 @@ const Hero = ({
 
         {/* Content */}
         <div className="absolute inset-0 z-30 grid place-items-center px-4 md:px-6">
-          <div className="mx-auto max-w-3xl rounded-2xl bg-black/45 backdrop-blur-md ring-1 ring-white/15 shadow-[0_10px_40px_rgba(0,0,0,.55)] px-6 py-6 md:px-8 md:py-8 text-center">
+          <div className="mx-auto max-w-3xl rounded-2xl bg-black/45 backdrop-blur-md ring-1 ring-white/15 shadow-[0_10px_40px_rgba(0,0,0,.55)] px-4 py-4 sm:px-6 sm:py-6 md:px-8 md:py-8 text-center">
             <motion.h1
-              className="text-4xl md:text-5xl lg:text-6xl font-semibold tracking-tight leading-tight text-white [text-shadow:_0_0_3px_rgba(0,0,0,0.9),0_0_8px_rgba(0,0,0,0.7),0_0_12px_rgba(0,0,0,0.6),0_1px_0_rgba(255,255,255,0.2)]"
+              className="font-semibold tracking-tight text-white [text-shadow:_0_0_3px_rgba(0,0,0,0.9),0_0_8px_rgba(0,0,0,0.7),0_0_12px_rgba(0,0,0,0.6),0_1px_0_rgba(255,255,255,0.2)]"
+              style={{
+                fontSize: 'clamp(26px, 5vw, 34px)',
+                lineHeight: '1.15',
+                letterSpacing: '-0.01em',
+                marginBottom: '8px'
+              }}
               initial={{ opacity: 0, y: prefersReducedMotion ? 0 : 14 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.45, ease: 'easeOut' }}
@@ -58,7 +69,12 @@ const Hero = ({
             </motion.h1>
 
             <motion.p
-              className="mt-4 text-lg md:text-xl text-white/95 leading-relaxed mb-8 max-w-2xl mx-auto [text-shadow:_0_0_2px_rgba(0,0,0,0.85),0_0_6px_rgba(0,0,0,0.7)]"
+              className="text-white/95 leading-relaxed max-w-2xl mx-auto [text-shadow:_0_0_2px_rgba(0,0,0,0.85),0_0_6px_rgba(0,0,0,0.7)]"
+              style={{
+                fontSize: 'clamp(14px, 3.5vw, 18px)',
+                marginTop: '8px',
+                marginBottom: '16px'
+              }}
               initial={{ opacity: 0, y: prefersReducedMotion ? 0 : 14 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.45, ease: 'easeOut', delay: 0.08 }}
@@ -67,14 +83,15 @@ const Hero = ({
             </motion.p>
 
             <motion.div
-              className="flex flex-wrap items-center justify-center gap-3"
+              className="flex flex-wrap items-center justify-center gap-2 sm:gap-3"
               initial={{ opacity: 0, y: prefersReducedMotion ? 0 : 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.45, ease: 'easeOut', delay: 0.15 }}
             >
               <button
                 onClick={handleScheduleClick}
-                className="rounded-xl bg-emerald-600 px-5 py-3 text-white font-medium shadow-lg shadow-emerald-900/25 hover:bg-emerald-500 active:scale-[.99] transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
+                className="rounded-xl bg-emerald-600 px-4 py-3 text-white font-medium shadow-lg shadow-emerald-900/25 hover:bg-emerald-500 active:scale-[.99] transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
+                style={{ minHeight: '48px', fontSize: '14px' }}
                 aria-label="Schedule a free consultation"
                 data-gtm="hero-cta-schedule"
               >
@@ -83,7 +100,8 @@ const Hero = ({
 
               <button
                 onClick={handleSeeOptionsClick}
-                className="rounded-xl px-5 py-3 font-medium text-white/95 ring-1 ring-white/35 hover:bg-white/10 active:scale-[.99] transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
+                className="rounded-xl px-4 py-3 font-medium text-white/95 ring-1 ring-white/35 hover:bg-white/10 active:scale-[.99] transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/70"
+                style={{ minHeight: '48px', fontSize: '14px' }}
                 aria-label="See your insurance options"
                 data-gtm="hero-cta-options"
               >

@@ -12,15 +12,17 @@
     "dev:vercel": "vercel dev"
   },
   "dependencies": {
+    "@vercel/node": "^5.3.11",
     "clsx": "^2.1.1",
     "framer-motion": "^12.23.12",
+    "jsonwebtoken": "^9.0.2",
     "lucide-react": "^0.539.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "react-router-dom": "^6.22.3",
-    "jsonwebtoken": "^9.0.2"
+    "react-router-dom": "^6.22.3"
   },
   "devDependencies": {
+    "@types/jsonwebtoken": "^9.0.6",
     "@types/node": "^20.12.12",
     "@types/react": "^18.2.79",
     "@types/react-dom": "^18.2.25",
@@ -36,8 +38,7 @@
     "ts-node": "^10.9.2",
     "typescript": "^5.4.5",
     "vite": "^4.5.14",
-    "wait-on": "^8.0.4",
-    "@types/jsonwebtoken": "^9.0.6"
+    "wait-on": "^8.0.4"
   },
   "engines": {
     "node": ">=18.17"

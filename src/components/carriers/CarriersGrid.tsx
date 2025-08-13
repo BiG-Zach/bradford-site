@@ -1,51 +1,75 @@
 import * as React from 'react';
-type Logo = { key: string; name: string; alt: string; src: string; tags?: string[] };
 
-const LOGOS: Logo[] = [
-  { key: 'aetna', name: 'Aetna', alt: 'Aetna — PPO Network', src: '/logos/carriers/aetna.webp', tags: ['ppo'] },
-  { key: 'aflac', name: 'Aflac', alt: 'Aflac — Supplemental Coverage', src: '/logos/carriers/aflac.webp', tags: ['supplemental'] },
-  { key: 'allstate', name: 'Allstate Health Solutions', alt: 'Allstate Health Solutions — PPO Network', src: '/logos/carriers/allstate.webp', tags: ['ppo'] },
-  { key: 'americo', name: 'Americo', alt: 'Americo — Life Insurance', src: '/logos/carriers/americo.webp', tags: ['life'] },
-  { key: 'bcbs', name: 'Blue Cross Blue Shield', alt: 'Blue Cross Blue Shield — PPO Network', src: '/logos/carriers/bluecrossblueshield.png', tags: ['ppo','bcbs'] },
-  { key: 'cigna', name: 'Cigna', alt: 'Cigna — PPO Network', src: '/logos/carriers/cigna.webp', tags: ['ppo'] },
-  { key: 'firsthealth', name: 'First Health', alt: 'First Health — PPO Network', src: '/logos/carriers/firsthealth.webp', tags: ['ppo'] },
-  { key: 'multiplan', name: 'MultiPlan', alt: 'MultiPlan — PPO Network', src: '/logos/carriers/multiplan.webp', tags: ['ppo'] },
-  { key: 'mof', name: 'Mutual of Omaha', alt: 'Mutual of Omaha — Life & Health', src: '/logos/carriers/mutualofomaha.webp', tags: ['life','health'] },
-  { key: 'pal', name: 'PAL (Philadelphia American Life)', alt: 'PAL — Health', src: '/logos/carriers/pal.webp', tags: ['health'] },
-  { key: 'sgic', name: 'SGIC', alt: 'SGIC — Health', src: '/logos/carriers/sgic.webp', tags: ['health'] },
-  { key: 'uhc', name: 'UnitedHealthcare', alt: 'UnitedHealthcare — PPO Network', src: '/logos/carriers/unitedhealthcare.webp', tags: ['ppo','uhc'] }
+type Carrier = { name: string; src: string };
+
+const CARRIERS: Carrier[] = [
+  { name: 'Aetna', src: '/logos/carriers/aetna.webp' },
+  { name: 'Aflac', src: '/logos/carriers/aflac.webp' },
+  { name: 'Allstate', src: '/logos/carriers/allstate.webp' },
+  { name: 'Americo', src: '/logos/carriers/americo.webp' },
+  { name: 'Cigna', src: '/logos/carriers/cigna.webp' },
+  { name: 'Blue Cross Blue Shield', src: '/logos/carriers/bluecrossblueshield.png' },
+  { name: 'First Health', src: '/logos/carriers/firsthealth.webp' },
+  { name: 'Mutual of Omaha', src: '/logos/carriers/mutualofomaha.webp' },
+  { name: 'SGIC', src: '/logos/carriers/sgic.webp' },
+  { name: 'Multiplan', src: '/logos/carriers/multiplan.webp' },
+  { name: 'PAL', src: '/logos/carriers/pal.webp' },
+  { name: 'UnitedHealthcare', src: '/logos/carriers/unitedhealthcare.webp' }
 ];
 
 export default function CarriersGrid() {
   const [q, setQ] = React.useState('');
+
   const filtered = React.useMemo(() => {
-    const query = q.trim().toLowerCase();
-    if (!query) return LOGOS;
-    return LOGOS.filter(c => [c.name, c.alt, ...(c.tags||[])].join(' ').toLowerCase().includes(query));
+    const s = q.trim().toLowerCase();
+    if (!s) return CARRIERS;
+    return CARRIERS.filter(c => c.name.toLowerCase().includes(s));
   }, [q]);
 
   return (
-    <div className="max-w-6xl mx-auto px-4 md:px-6">
-      <div className="mb-4 flex items-center justify-between gap-3">
-        <h2 className="text-xl md:text-2xl font-semibold tracking-tight">Our Carrier Partners</h2>
+    <section aria-labelledby="carriers-title" className="w-full">
+      <h2 id="carriers-title" className="sr-only">Carriers & PPO networks</h2>
+
+      <div className="mb-4">
         <input
+          type="search"
+          inputMode="search"
+          placeholder="Search carriers…"
           value={q}
-          onChange={(e) => setQ(e.target.value)}
-          placeholder="Filter carriers…"
-          className="rounded-xl border border-slate-300 px-3 py-2 text-sm w-56 focus:outline-none focus:ring-2 focus:ring-emerald-500"
-          aria-label="filter carriers"
+          onChange={(e)=>setQ(e.target.value)}
+          className="w-full rounded-xl border border-slate-300 px-4 py-3 shadow-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
+          style={{ fontSize: '16px', minHeight: '44px' }}
+          aria-label="Search carriers"
         />
       </div>
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 md:gap-4">
-        {filtered.map((c) => (
-          <div key={c.key} className="bg-white p-4 rounded-lg shadow-md hover:shadow-lg transition-shadow w-full h-20 flex items-center justify-center">
-            <img src={c.src} alt={c.alt} className="max-h-12 w-auto object-contain" loading="lazy" height={48} />
+
+      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+        {filtered.map(({name, src}) => (
+          <div
+            key={name}
+            className="rounded-2xl border border-slate-200 bg-white/70 backdrop-blur-sm p-3 shadow-sm"
+          >
+            {/* CLS-safe wrapper */}
+            <div className="relative aspect-[2/1] w-full">
+              <img
+                src={src}
+                alt={name}
+                width={160}
+                height={80}
+                loading="lazy"
+                decoding="async"
+                className="absolute inset-0 h-full w-full object-contain"
+              />
+            </div>
+            <p className="mt-2 text-center text-sm text-slate-700">{name}</p>
           </div>
         ))}
       </div>
-      <p className="mt-8 text-center text-sm text-gray-600">
-        All carriers are A+ rated with AM Best. We don’t use discount plans or limited networks.
+
+      <p className="mt-8 text-center text-xs text-slate-500">
+        Logos are for identification only. Plan availability varies by state and underwriting.
       </p>
-    </div>
+    </section>
   );
 }
+
